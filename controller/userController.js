@@ -90,3 +90,26 @@ exports.activateUser = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler(error.message, 500));
   }
 });
+
+// Login User
+exports.loginUser = catchAsyncError(async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return next(new ErrorHandler("Fill all fields", 400));
+    }
+
+    const user = await UserModel.findOne({ email }).select("+password");
+    if (!user) {
+      return next(new ErrorHandler("Incorrect credentials", 400));
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      return next(new ErrorHandler("Incorrect credentials", 400));
+    }
+    sendToken(user, 201, res);
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+});
