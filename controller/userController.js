@@ -113,3 +113,20 @@ exports.loginUser = catchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler(error.message, 500));
   }
 });
+
+// Load User
+exports.getUser = catchAsyncError(async (req, res, next) => {
+  try {
+    const user = await UserModel.findById(req.user.id);
+    if (!user) {
+      return next(new ErrorHandler("User doesn't Exist", 500));
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+});
